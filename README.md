@@ -1,1 +1,1 @@
-# cs5296-project
+# CS5296 Projects
