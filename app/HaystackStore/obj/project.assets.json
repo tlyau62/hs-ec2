@@ -13,11 +13,11 @@
   "project": {
     "version": "1.0.0",
     "restore": {
-      "projectUniqueName": "/Users/tlyau/Documents/git/cs5296-project/cs5296-project.csproj",
-      "projectName": "cs5296-project",
-      "projectPath": "/Users/tlyau/Documents/git/cs5296-project/cs5296-project.csproj",
+      "projectUniqueName": "/Users/tlyau/Documents/git/cs5296-project/app/HaystackStore/HaystackStore.csproj",
+      "projectName": "HaystackStore",
+      "projectPath": "/Users/tlyau/Documents/git/cs5296-project/app/HaystackStore/HaystackStore.csproj",
       "packagesPath": "/Users/tlyau/.nuget/packages/",
-      "outputPath": "/Users/tlyau/Documents/git/cs5296-project/obj/",
+      "outputPath": "/Users/tlyau/Documents/git/cs5296-project/app/HaystackStore/obj/",
       "projectStyle": "PackageReference",
       "configFilePaths": [
         "/Users/tlyau/.nuget/NuGet/NuGet.Config"
