@@ -23,7 +23,15 @@ public class Needle : INeedle
 
     public byte[] GetBytes()
     {
-        return new byte[0];
-        // byte[] intBytes = BitConverter.GetBytes(intValue);
+        var bytes = new List<byte>();
+
+        bytes.AddRange(BitConverter.GetBytes(Header));
+        bytes.AddRange(BitConverter.GetBytes(Key));
+        bytes.AddRange(BitConverter.GetBytes(Flags));
+        bytes.AddRange(BitConverter.GetBytes(Size));
+        bytes.AddRange(Data);
+        bytes.AddRange(BitConverter.GetBytes(Footer));
+
+        return bytes.ToArray();
     }
 }
