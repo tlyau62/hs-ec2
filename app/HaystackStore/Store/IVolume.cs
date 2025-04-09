@@ -2,6 +2,12 @@ namespace HaystackStore;
 
 public interface IVolume
 {
-    ISuperblock Superblock { get; set; }
+    int VolumeId { get; }
+    /**
+     * return offset
+     */
+    Metadata WriteNeedle(long key, byte[] data);
+    Needle ReadNeedle(long offset);
+    IEnumerable<Metadata> GetAllMetadata();
 }
 

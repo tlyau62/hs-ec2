@@ -1,7 +1,10 @@
 namespace HaystackStore;
 
-public class Needle : INeedle
+public class Needle
 {
+    public const uint HEADER_MAGIC_NUMBER = 0x12345678;
+    public const uint FOOTER_MAGIC_NUMBER = 0x09ABCDEF;
+
     // uint allows full 32-bit range for 0x12345678
     public uint Header { get; set; }
     public long Key { get; set; }
@@ -10,28 +13,33 @@ public class Needle : INeedle
     public byte[] Data { get; set; } = [];
     public uint Footer { get; set; }
     public uint Checksum { get; set; }
-    public int Padding { get; set; }
-    public int TotalSize =>
-        4 + // Header
-        8 + // Key
-        1 + // Flags 
-        4 + // Size
-        Data.Length +
-        4 + // Footer
-        8 + // Checksum
-        Padding;
-
-    public byte[] GetBytes()
+    public byte[] TotalBytes
     {
-        var bytes = new List<byte>();
+        get
+        {
+            var bytes = new List<byte>();
 
-        bytes.AddRange(BitConverter.GetBytes(Header));
-        bytes.AddRange(BitConverter.GetBytes(Key));
-        bytes.AddRange(BitConverter.GetBytes(Flags));
-        bytes.AddRange(BitConverter.GetBytes(Size));
-        bytes.AddRange(Data);
-        bytes.AddRange(BitConverter.GetBytes(Footer));
+            bytes.AddRange(BitConverter.GetBytes(Header));
+            bytes.AddRange(BitConverter.GetBytes(Key));
+            bytes.AddRange(BitConverter.GetBytes(Flags));
+            bytes.AddRange(BitConverter.GetBytes(Size));
+            bytes.AddRange(Data);
+            bytes.AddRange(BitConverter.GetBytes(Footer));
+            bytes.AddRange(BitConverter.GetBytes(Checksum));
 
-        return bytes.ToArray();
+            return bytes.ToArray();
+        }
     }
+
+    public byte[] Padding
+    {
+        get
+        {
+            const int ALIGNMENT = 8;
+            var currentSize = TotalBytes.Length;
+            int paddingNeeded = (ALIGNMENT - (currentSize % ALIGNMENT)) % ALIGNMENT;
+            return new byte[paddingNeeded];
+        }
+    }
+
 }

@@ -17,7 +17,6 @@ public class VolumeManger : IVolumeManger
         Init();
     }
 
-
     public IVolume GetVolume(int key)
     {
         var id = GetVolumnId(key);
@@ -40,12 +39,27 @@ public class VolumeManger : IVolumeManger
     {
         for (var i = 0; i < nVols; i++)
         {
-            var path = GetVolumePath(i);
-            var volumeFile = File.Exists(path) ? File.OpenRead(path) : File.Create(path);
-            var volume = new Volume(volumeFile);
+            var filePath = GetVolumePath(i);
+            FileStream volumeFile;
+            Volume volume;
 
+            if (!File.Exists(filePath))
+            {
+                volumeFile = new FileStream(filePath, FileMode.CreateNew, FileAccess.ReadWrite);
+            }
+            else
+            {
+                volumeFile = new FileStream(filePath, FileMode.Open, FileAccess.ReadWrite);
+            }
+
+            volume = new Volume(i, volumeFile);
             _volumes[i] = volume;
         }
+    }
+
+    public IEnumerable<IVolume> GetVolumes()
+    {
+        return _volumes.Values;
     }
 }
 

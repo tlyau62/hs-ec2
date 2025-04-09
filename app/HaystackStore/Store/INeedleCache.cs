@@ -2,7 +2,7 @@ namespace HaystackStore;
 
 public interface INeedleCache
 {
-    Metadata? GetNeedle(int key);
-    void CacheNeedle(INeedle needle, long offset);
+    Metadata? GetNeedle(int volumeId, long key);
+    void CacheNeedle(int volumeId, Metadata needle);
 }
 
