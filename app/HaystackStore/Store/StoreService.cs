@@ -17,7 +17,7 @@ public class StoreService : IStoreService
         var volume = _volumeManger.GetVolume(key); // hash
         var metadata = _needleCache.GetNeedle(key) ??
             throw new InvalidOperationException($"Fail to get metadata for key {key}");
-        var needle = volume.Superblock.GetNeedleByOffset(metadata.Offset);
+        var needle = volume.Superblock.ReadNeedle(metadata.Offset);
 
         return needle.Data;
     }
@@ -25,7 +25,7 @@ public class StoreService : IStoreService
     public void WritePhoto(int key, byte[] data)
     {
         var volume = _volumeManger.GetVolume(key); // hash
-        var needle = new Needle(key, data);
+        var needle = volume.Superblock.CreateNeedle(key, data);
         var offset = volume.Superblock.AppendNeedle(needle);
 
         _needleCache.CacheNeedle(needle, offset);

@@ -5,7 +5,8 @@ public interface ISuperblock
     /**
      * return offset
      */
-    int AppendNeedle(INeedle needle);
+    long AppendNeedle(INeedle needle);
     INeedle ReadNeedle(long offset);
+    INeedle CreateNeedle(long key, byte[] data);
 }
 

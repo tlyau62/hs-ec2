@@ -13,12 +13,41 @@ public class Superblock : ISuperblock
         _volumeFile = volumeFile;
     }
 
+    public INeedle CreateNeedle(long key, byte[] data)
+    {
+        var needle = new Needle();
+
+        needle.Header = HEADER_MAGIC_NUMBER;
+        needle.Key = key;
+        needle.Flags = false;
+        needle.Size = data.Length;
+        needle.Data = data;
+        needle.Footer = FOOTER_MAGIC_NUMBER;
+        needle.Checksum = CalculateChecksum(needle.GetBytes());
+        needle.Padding = CalculatePadding(needle.TotalSize);
+
+        return needle;
+    }
+
     /**
      * return offset
      */
-    public int AppendNeedle(INeedle needle)
+    public long AppendNeedle(INeedle needle)
     {
-        return 0;
+        using var writer = new BinaryWriter(_volumeFile, System.Text.Encoding.UTF8, true);
+        var offset = _volumeFile.Seek(0, SeekOrigin.End);
+
+        writer.Write(needle.Header);
+        writer.Write(needle.Key);
+        writer.Write(needle.Flags ? 1 : 0);
+        writer.Write(needle.Size);
+        writer.Write(needle.Data);
+        writer.Write(needle.Footer);
+        writer.Write(needle.Checksum);
+        writer.Write(needle.Padding);
+        writer.Write(new byte[needle.Padding]);
+
+        return offset;
     }
 
     public INeedle ReadNeedle(long offset)
@@ -42,15 +71,12 @@ public class Superblock : ISuperblock
         needle.Data = reader.ReadBytes(needle.Size);
 
         needle.Footer = reader.ReadUInt32();
-
         if (needle.Footer != FOOTER_MAGIC_NUMBER)
         {
             throw new InvalidDataException("Invalid needle footer");
-
         }
 
         needle.Checksum = reader.ReadUInt32();
-
         if (needle.Checksum != CalculateChecksum(needle.GetBytes()))
         {
             throw new InvalidDataException("Checksum verification failed");
@@ -68,11 +94,11 @@ public class Superblock : ISuperblock
         return (uint)data.Sum(b => (int)b);
     }
 
-    private byte[] CalculatePadding(int currentSize)
+    private int CalculatePadding(int currentSize)
     {
         const int ALIGNMENT = 8;
-        int paddingNeeded = (ALIGNMENT - (currentSize % ALIGNMENT)) % ALIGNMENT;
-        return new byte[paddingNeeded]; // Initialized to zeros
+
+        return (ALIGNMENT - (currentSize % ALIGNMENT)) % ALIGNMENT;
     }
 }
 
