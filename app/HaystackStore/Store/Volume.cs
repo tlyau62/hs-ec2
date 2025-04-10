@@ -26,7 +26,7 @@ public class Volume : IVolume, IDisposable
             Footer = Needle.FOOTER_MAGIC_NUMBER,
         };
 
-        needle.Checksum = CalculateChecksum(needle.TotalBytes);
+        needle.Checksum = CalculateChecksum(needle);
 
         var offset = WriteNeedleToDisk(needle);
 
@@ -77,7 +77,7 @@ public class Volume : IVolume, IDisposable
             throw new InvalidDataException("Invalid needle footer");
         }
 
-        if (needle.Checksum != CalculateChecksum(needle.TotalBytes))
+        if (needle.Checksum != CalculateChecksum(needle))
         {
             throw new InvalidDataException("Checksum verification failed");
         }
@@ -85,9 +85,13 @@ public class Volume : IVolume, IDisposable
         return needle;
     }
 
-    private uint CalculateChecksum(byte[] data)
+    private uint CalculateChecksum(Needle needle)
     {
-        return (uint)data.Sum(b => (int)b);
+        var checksum = (uint)needle.TotalBytes.Sum(b => b);
+
+        checksum -= (uint)BitConverter.GetBytes(needle.Checksum).Sum(b => b);
+
+        return checksum;
     }
 
     public void Dispose()

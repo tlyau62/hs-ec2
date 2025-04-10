@@ -25,7 +25,7 @@ public class Needle
             bytes.AddRange(BitConverter.GetBytes(Size));
             bytes.AddRange(Data);
             bytes.AddRange(BitConverter.GetBytes(Footer));
-            // bytes.AddRange(BitConverter.GetBytes(Checksum));
+            bytes.AddRange(BitConverter.GetBytes(Checksum));
 
             return bytes.ToArray();
         }
