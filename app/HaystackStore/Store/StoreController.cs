@@ -3,7 +3,7 @@ using Microsoft.AspNetCore.Mvc;
 
 namespace HaystackStore;
 
-[Route("api/[controller]")]
+[Route("api/store")]
 [ApiController]
 public class StoreController : ControllerBase
 {
@@ -14,6 +14,12 @@ public class StoreController : ControllerBase
         _storeService = storeService;
     }
 
+    [HttpGet("photos/test")]
+    public int Test()
+    {
+        return 10;
+    }
+
     [HttpGet("photos/{key}")]
     public byte[] ReadPhoto(int key)
     {
@@ -21,9 +27,12 @@ public class StoreController : ControllerBase
     }
 
     [HttpPost("photos/{key}")]
-    public void WritePhoto(int key, byte[] data)
+    public void WritePhoto(int key, IFormFile file)
     {
-        _storeService.WritePhoto(key, data);
+        using var ms = new MemoryStream();
+
+        file.CopyTo(ms);
+        _storeService.WritePhoto(key, ms.ToArray());
     }
 }
 
