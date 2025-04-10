@@ -7,4 +7,3 @@ public class Metadata
     public long Offset { get; set; }
     public int Size { get; set; }
 }
-
