@@ -11,7 +11,7 @@ public class NeedleCache : INeedleCache
 
     public Metadata? GetNeedle(int volumeId, long key)
     {
-        var metadata = _caches[volumeId][key];
+        _caches[volumeId].TryGetValue(key, out Metadata? metadata);
 
         return metadata;
     }

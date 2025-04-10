@@ -22,7 +22,6 @@ public class StoreService : IStoreService
         var needle = volume.ReadNeedle(metadata.Offset);
 
         return needle.Data;
-
     }
 
     public void WritePhoto(int key, byte[] data)
