@@ -21,11 +21,11 @@ public class Needle
 
             bytes.AddRange(BitConverter.GetBytes(Header));
             bytes.AddRange(BitConverter.GetBytes(Key));
-            bytes.AddRange(BitConverter.GetBytes(Flags));
+            bytes.Add((byte)(Flags ? 1 : 0));
             bytes.AddRange(BitConverter.GetBytes(Size));
             bytes.AddRange(Data);
             bytes.AddRange(BitConverter.GetBytes(Footer));
-            bytes.AddRange(BitConverter.GetBytes(Checksum));
+            // bytes.AddRange(BitConverter.GetBytes(Checksum));
 
             return bytes.ToArray();
         }
@@ -42,4 +42,8 @@ public class Needle
         }
     }
 
+    public override string ToString()
+    {
+        return $"Header = {Header}, Key = {Key}, Flags = {Flags}, Size = {Size}";
+    }
 }

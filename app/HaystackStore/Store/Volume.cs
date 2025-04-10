@@ -40,7 +40,7 @@ public class Volume : IVolume, IDisposable
 
         writer.Write(needle.Header);
         writer.Write(needle.Key);
-        writer.Write(needle.Flags ? 1 : 0);
+        writer.Write(needle.Flags ? (byte)1 : (byte)0);
         writer.Write(needle.Size);
         writer.Write(needle.Data);
         writer.Write(needle.Checksum);

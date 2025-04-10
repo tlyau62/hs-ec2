@@ -45,6 +45,7 @@ public class VolumeManger : IVolumeManger
 
             if (!File.Exists(filePath))
             {
+                Directory.CreateDirectory(Path.GetDirectoryName(filePath));
                 volumeFile = new FileStream(filePath, FileMode.CreateNew, FileAccess.ReadWrite);
             }
             else

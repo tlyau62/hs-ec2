@@ -15,9 +15,9 @@ public class StoreController : ControllerBase
     }
 
     [HttpGet("photos/test")]
-    public int Test()
+    public string Test()
     {
-        return 10;
+        return "OK";
     }
 
     [HttpGet("photos/{key}")]
