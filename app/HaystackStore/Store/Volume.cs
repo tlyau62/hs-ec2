@@ -23,10 +23,10 @@ public class Volume : IVolume, IDisposable
             Flags = false,
             Size = data.Length,
             Data = data,
-            Footer = Needle.FOOTER_MAGIC_NUMBER,
         };
 
         needle.Checksum = CalculateChecksum(needle);
+        needle.Footer = Needle.FOOTER_MAGIC_NUMBER;
 
         var offset = WriteNeedleToDisk(needle);
 
@@ -63,23 +63,22 @@ public class Volume : IVolume, IDisposable
             Size = reader.ReadInt32()
         };
 
-        needle.Data = reader.ReadBytes(needle.Size);
-        needle.Checksum = reader.ReadUInt32();
-        needle.Footer = reader.ReadUInt32();
-
         if (needle.Header != Needle.HEADER_MAGIC_NUMBER)
         {
             throw new InvalidDataException("Invalid needle header");
         }
 
-        if (needle.Footer != Needle.FOOTER_MAGIC_NUMBER)
-        {
-            throw new InvalidDataException("Invalid needle footer");
-        }
-
+        needle.Data = reader.ReadBytes(needle.Size);
+        needle.Checksum = reader.ReadUInt32();
         if (needle.Checksum != CalculateChecksum(needle))
         {
             throw new InvalidDataException("Checksum verification failed");
+        }
+
+        needle.Footer = reader.ReadUInt32();
+        if (needle.Footer != Needle.FOOTER_MAGIC_NUMBER)
+        {
+            throw new InvalidDataException("Invalid needle footer");
         }
 
         return needle;
@@ -87,11 +86,11 @@ public class Volume : IVolume, IDisposable
 
     private uint CalculateChecksum(Needle needle)
     {
-        var checksum = (uint)needle.TotalBytes.Sum(b => b);
+        var checksum = needle.TotalBytes.Sum(b => b);
 
-        checksum -= (uint)BitConverter.GetBytes(needle.Checksum).Sum(b => b);
+        checksum -= BitConverter.GetBytes(needle.Checksum).Sum(b => b);
 
-        return checksum;
+        return (uint)checksum;
     }
 
     public void Dispose()
@@ -109,7 +108,7 @@ public class Volume : IVolume, IDisposable
             var needle = ReadNeedle(offset);
             var index = CreateMetadata(offset, needle);
             list.Add(index);
-            offset = needle.TotalBytes.Length;
+            offset += needle.TotalBytes.Length + needle.Padding.Length;
         }
 
         return list;

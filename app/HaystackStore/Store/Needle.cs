@@ -44,6 +44,6 @@ public class Needle
 
     public override string ToString()
     {
-        return $"Header = {Header}, Key = {Key}, Flags = {Flags}, Size = {Size}";
+        return $"Header = {Header}, Key = {Key}, Flags = {Flags}, Size = {Size}, Data = {Data.Length}, Footer = {Footer}, Checksum = {Checksum}";
     }
 }
