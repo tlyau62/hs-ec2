@@ -4,9 +4,11 @@ public class NeedleCache : INeedleCache
 {
     private readonly Dictionary<int, Dictionary<long, Metadata>> _caches = [];
 
-    public NeedleCache(int volumeSizes)
+    public NeedleCache(IConfiguration config)
     {
-        Init(volumeSizes);
+        var size = config.GetValue<int?>("Volumes:Size") ??
+            throw new InvalidDataException("missing config Volumes:Size");
+        Init(size);
     }
 
     public Metadata? GetNeedle(int volumeId, long key)

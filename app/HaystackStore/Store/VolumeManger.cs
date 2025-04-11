@@ -12,8 +12,12 @@ public class VolumeManger : IVolumeManger
 
     private IDictionary<int, Volume> _volumes = new Dictionary<int, Volume>();
 
-    public VolumeManger()
+    public VolumeManger(IConfiguration config)
     {
+        mountFolder = config.GetValue<string>("Volumes:MountFolder") ??
+            throw new InvalidDataException("missing config Volumes:MountFolder");
+        nVols = config.GetValue<int?>("Volumes:Size") ??
+            throw new InvalidDataException("missing config Volumes:Size");
         Init();
     }
 
