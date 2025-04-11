@@ -1,4 +1,7 @@
-﻿namespace HaystackStore;
+﻿using System.IO.Compression;
+using System.Text.RegularExpressions;
+
+namespace HaystackStore;
 
 public class StoreService : IStoreService
 {
@@ -30,6 +33,34 @@ public class StoreService : IStoreService
         var metadata = volume.WriteNeedle(key, data);
 
         _needleCache.CacheNeedle(volume.VolumeId, metadata);
+    }
+
+    public void UnpackPhotos(string keyPattern, byte[] data)
+    {
+        using var stream = new MemoryStream(data);
+        using var zip = new ZipArchive(stream);
+        var keyregex = new Regex(keyPattern);
+
+        foreach (var file in zip.Entries)
+        {
+            var filename = Path.GetFileNameWithoutExtension(file.Name);
+            var matches = keyregex.Matches(filename);
+
+            if (!matches.Any())
+            {
+                continue;
+            }
+
+            var keystr = keyregex.Matches(filename)[0].Groups[0].Captures[0].Value;
+
+            var key = int.Parse(keystr);
+            using var fileData = file.Open();
+            using var fileStream = new MemoryStream();
+
+            fileData.CopyTo(fileStream);
+
+            WritePhoto(key, fileStream.ToArray());
+        }
     }
 
     private void Init()

@@ -34,5 +34,14 @@ public class StoreController : ControllerBase
         file.CopyTo(ms);
         _storeService.WritePhoto(key, ms.ToArray());
     }
+
+    [HttpPost("photos")]
+    public void UnpackPhotos(IFormFile file, [FromForm] string keyPattern = "^\\d+")
+    {
+        using var ms = new MemoryStream();
+
+        file.CopyTo(ms);
+        _storeService.UnpackPhotos(keyPattern, ms.ToArray());
+    }
 }
 
