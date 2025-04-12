@@ -1,132 +1,89 @@
 # CS5296 Projects
 
-## Components
+## Deploy
 
-### The Store
+### Prepare the source codes
 
-Class Diagram
+Zip the source codes
 
-```mermaid
-classDiagram
-    class HaystackStore {
-        -volumeId: string
-        -volumeFile: File
-        -superblock: Superblock
-        -inMemoryIndex: Map<NeedleId, NeedleMetadata>
-        +writePhoto(photoId, photoData): NeedleId
-        +readPhoto(needleId): PhotoData
-        +deletePhoto(needleId): boolean
-        -appendNeedle(needle): void
-        -readNeedle(offset, size): Needle
-    }
-
-    class Superblock {
-        -magicNumber: number
-        -version: number
-        -needleCount: number
-        -dataSize: number
-        -checksum: number
-    }
-
-    class Needle {
-        +header: NeedleHeader
-        +data: PhotoData
-        +footer: NeedleFooter
-    }
-
-    class NeedleHeader {
-        -magicNumber: number
-        -cookie: number
-        -key: NeedleId
-        -dataSize: number
-        -flags: number
-    }
-
-    class NeedleFooter {
-        -magicNumber: number
-        -checksum: number
-    }
-
-    class NeedleMetadata {
-        +offset: number
-        +size: number
-        +flags: number
-        +cookie: number
-    }
-
-    HaystackStore "1" --> "1" Superblock
-    HaystackStore "1" --> "*" NeedleMetadata
-    HaystackStore "1" --> "*" Needle
-    Needle "1" --> "1" NeedleHeader
-    Needle "1" --> "1" NeedleFooter
+```sh
+cd ./app/HaystackStore
+zip -r src.zip . -x "bin/*" "obj/*"
 ```
 
-Key points:
+Upload to ec2 instance
 
-- The HaystackStore class manages the entire volume file
-- Photos are stored as "Needles" within the volume file
-- All metadata is kept in memory (inMemoryIndex)
-- Superblock contains volume-level metadata
-- Each Needle has header, photo data, and footer
-
-Activity Diagram for Photo Read Operation
-
-```mermaid
-flowchart TD
-    A[Start Read Request] --> B{Needle ID in\nmemory index?}
-    B -->|Yes| C[Get offset/size from index]
-    B -->|No| D[Return Photo Not Found]
-    C --> E[Seek to offset in volume file]
-    E --> F[Read needle header]
-    F --> G[Verify magic number/cookie]
-    G --> H[Read photo data]
-    H --> I[Read needle footer]
-    I --> J[Verify checksum]
-    J --> K[Return photo data]
-    G -->|Invalid| L[Return Corrupt Data Error]
-    J -->|Invalid| L
+```sh
+scp -i ~/Desktop/ec2/pem2.pem src.zip ubuntu@52.207.245.24:~
 ```
 
-Component Diagram for Stage 1 Testing
+Ssh into the ec2 instance
 
-```mermaid
-flowchart TD
-    subgraph EC2 Instance
-        A[Test Client] --> B[Haystack Store]
-        A --> C[NFS Client]
-        B --> D[EBS Volume\nHaystack Format]
-        C --> E[EBS Volume\nTraditional FS]
-    end
-
-    F[Photo Dataset] --> A
-    A --> G[Metrics Collector]
-    G --> H[Performance Report]
+```sh
+ssh -i ~/Desktop/ec2/pem2.pem ubuntu@52.207.245.24
 ```
 
-Sequence Diagram for Photo Write
+### Build the source codes
 
-```mermaid
-sequenceDiagram
-    participant Client
-    participant HaystackStore
-    participant VolumeFile
-    participant MemoryIndex
+Unzip the source code
 
-    Client->>HaystackStore: writePhoto(photoId, data)
-    HaystackStore->>VolumeFile: Append needle (header+data+footer)
-    VolumeFile-->>HaystackStore: New file offset
-    HaystackStore->>MemoryIndex: Store metadata (offset, size, etc)
-    HaystackStore-->>Client: Return needleId
+```sh
+sudo apt install unzip
+unzip src.zip -d src
 ```
 
-Keypoints:
+Install .Net SDK
 
-1. Implementation Recommendations for TypeScript:
-   For the volume file operations, consider using Node.js fs module with async APIs
-2. Use a Map object for the in-memory index (O(1) lookups)
-3. Implement proper file locking for concurrent access
-4. Consider using Protocol Buffers or similar for binary serialization of needles
-5. For performance testing against NFS, you might want to:
-   - Create a test harness that generates synthetic photo requests
-   - Measure operations per second, latency distributions
-   - Track memory usage and I/O patterns
+```sh
+# https://learn.microsoft.com/en-us/dotnet/core/install/linux-scripted-manual#scripted-install
+wget https://dot.net/v1/dotnet-install.sh -O dotnet-install.sh
+chmod +x ./dotnet-install.sh
+./dotnet-install.sh --version latest # .NET 8
+export DOTNET_ROOT=$HOME/.dotnet
+export PATH=$PATH:$DOTNET_ROOT:$DOTNET_ROOT/tools
+```
+
+Build the source codes
+
+```sh
+dotnet publish
+```
+
+### Start the server
+
+Change settings
+
+```sh
+# update the settings
+vim appsettings.json
+
+# update port
+export ASPNETCORE_HTTP_PORTS=8080
+
+# make sure the firewall of the ec2 instance has opened the port 8080
+# ec2 instance -> security group -> inbound rules -> allows http 8080 from anywhere IPV4
+```
+
+Start the server
+
+```sh
+./bin/Release/net8.0/HaystackStore
+```
+
+Test the server
+
+```sh
+http://13.218.36.59:8080/api/store/photos/test # should return OK
+```
+
+Access to the api
+
+```sh
+# change to development mode, and restart server
+export DOTNET_ENVIRONMENT=Development
+
+# access to system testing page: http://13.218.36.59:8080/swagger
+
+# try upload the photo test pack at /api/store/photos: test-files/subset_faces.zip
+# try get a photo: /api/store/photos/1
+```
