@@ -14,10 +14,10 @@ public class VolumeManger : IVolumeManger
 
     public VolumeManger(IConfiguration config)
     {
-        mountFolder = config.GetValue<string>("Volumes:MountFolder") ??
-            throw new InvalidDataException("missing config Volumes:MountFolder");
-        nVols = config.GetValue<int?>("Volumes:Size") ??
-            throw new InvalidDataException("missing config Volumes:Size");
+        mountFolder = config.GetValue<string>("Haystack:MountFolder") ??
+            throw new InvalidDataException("missing config Haystack:MountFolder");
+        nVols = config.GetValue<int?>("Haystack:Size") ??
+            throw new InvalidDataException("missing config Haystack:Size");
         Init();
     }
 

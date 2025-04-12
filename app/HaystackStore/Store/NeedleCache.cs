@@ -6,8 +6,8 @@ public class NeedleCache : INeedleCache
 
     public NeedleCache(IConfiguration config)
     {
-        var size = config.GetValue<int?>("Volumes:Size") ??
-            throw new InvalidDataException("missing config Volumes:Size");
+        var size = config.GetValue<int?>("Haystack:Size") ??
+            throw new InvalidDataException("missing config Haystack:Size");
         Init(size);
     }
 

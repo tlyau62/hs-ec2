@@ -17,11 +17,16 @@ public class StoreService : IStoreService
         Init();
     }
 
-    public byte[] ReadPhoto(int key)
+    public byte[]? ReadPhoto(int key)
     {
         var volume = _volumeManger.GetVolume(key); // hash
-        var metadata = _needleCache.GetNeedle(volume.VolumeId, key) ??
-            throw new InvalidOperationException($"Fail to get metadata for key {key}");
+        var metadata = _needleCache.GetNeedle(volume.VolumeId, key);
+
+        if (metadata == null)
+        {
+            return null;
+        }
+
         var needle = volume.ReadNeedle(metadata.Offset);
 
         return needle.Data;

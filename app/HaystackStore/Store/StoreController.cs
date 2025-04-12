@@ -21,9 +21,16 @@ public class StoreController : ControllerBase
     }
 
     [HttpGet("photos/{key}")]
-    public FileContentResult ReadPhoto(int key)
+    public IActionResult ReadPhoto(int key)
     {
-        return File(_storeService.ReadPhoto(key), "image/png");
+        var photo = _storeService.ReadPhoto(key);
+
+        if (photo == null)
+        {
+            return NotFound(key);
+        }
+
+        return File(photo, "image/png");
     }
 
     [HttpPost("photos/{key}")]
