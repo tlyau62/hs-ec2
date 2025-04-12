@@ -5,6 +5,7 @@ var builder = WebApplication.CreateBuilder(args);
 builder.Services.AddSingleton<IVolumeManger, VolumeManger>();
 builder.Services.AddSingleton<IStoreService, StoreService>();
 builder.Services.AddSingleton<INeedleCache, NeedleCache>();
+builder.Services.AddSingleton<IFsStoreService, FsStoreService>();
 
 builder.Services.AddControllers();
 
