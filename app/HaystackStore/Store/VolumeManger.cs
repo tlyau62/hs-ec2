@@ -4,7 +4,7 @@ namespace HaystackStore;
 
 public class VolumeManger : IVolumeManger
 {
-    private readonly int nVols = 1;
+    private int nVols = 0;
 
     private readonly string mountFolder = "/Users/tlyau/Documents/git/cs5296-project/app/HaystackStore/Volumes";
 
@@ -16,8 +16,6 @@ public class VolumeManger : IVolumeManger
     {
         mountFolder = config.GetValue<string>("Haystack:MountFolder") ??
             throw new InvalidDataException("missing config Haystack:MountFolder");
-        nVols = config.GetValue<int?>("Haystack:Size") ??
-            throw new InvalidDataException("missing config Haystack:Size");
         Init();
     }
 
@@ -34,16 +32,26 @@ public class VolumeManger : IVolumeManger
         return key % nVols;
     }
 
-    public string GetVolumePath(int id)
+    public string GetVolumePath(string dir, int id)
     {
-        return Path.Join(mountFolder, volumePrefix + id);
+        return Path.Join(dir, volumePrefix + id);
     }
 
     private void Init()
     {
+        var directories = Directory.GetDirectories(mountFolder);
+
+        nVols = directories.Length;
+
+        if (nVols == 0)
+        {
+            throw new InvalidOperationException("No volume is detected");
+        }
+
         for (var i = 0; i < nVols; i++)
         {
-            var filePath = GetVolumePath(i);
+            var dir = directories[i];
+            var filePath = GetVolumePath(dir, i);
             FileStream volumeFile;
             Volume volume;
 

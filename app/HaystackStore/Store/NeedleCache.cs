@@ -6,9 +6,10 @@ public class NeedleCache : INeedleCache
 
     public NeedleCache(IConfiguration config)
     {
-        var size = config.GetValue<int?>("Haystack:Size") ??
-            throw new InvalidDataException("missing config Haystack:Size");
-        Init(size);
+        var mountFolder = config.GetValue<string>("Haystack:MountFolder") ??
+              throw new InvalidDataException("missing config Haystack:MountFolder");
+
+        Init(mountFolder);
     }
 
     public Metadata? GetNeedle(int volumeId, long key)
@@ -23,9 +24,18 @@ public class NeedleCache : INeedleCache
         _caches[volumeId][needle.Key] = needle;
     }
 
-    private void Init(int volumeSizes)
+    private void Init(string mountFolder)
     {
-        for (var i = 0; i < volumeSizes; i++)
+        var directories = Directory.GetDirectories(mountFolder);
+
+        var nVols = directories.Length;
+
+        if (nVols == 0)
+        {
+            throw new InvalidOperationException("No volume is detected");
+        }
+
+        for (var i = 0; i < nVols; i++)
         {
             _caches[i] = [];
         }
