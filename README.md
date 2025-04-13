@@ -8,7 +8,7 @@ Zip the source codes
 
 ```sh
 cd ./app/HaystackStore
-zip -r src.zip . -x "bin/*" "obj/*"
+zip -r src.zip . -x "bin/*" "obj/*" "Upload/*" "Fs/*" "Volumes/*"
 ```
 
 Upload to ec2 instance
@@ -54,7 +54,10 @@ dotnet publish
 Change settings
 
 ```sh
-# update the settings
+# create folders
+mkdir /home/ubuntu/Volumes /home/ubuntu/Fs /home/ubuntu/Upload
+
+# update the settings, make sure to create volumes also
 vim appsettings.json
 
 # update port
@@ -62,6 +65,27 @@ export ASPNETCORE_HTTP_PORTS=8080
 
 # make sure the firewall of the ec2 instance has opened the port 8080
 # ec2 instance -> security group -> inbound rules -> allows http 8080 from anywhere IPV4
+```
+
+Example `appsettings.json`
+
+```json
+{
+  // only need to change these settings
+  "Haystack": {
+    "MountFolder": "/home/ubuntu/Volumes" // location for the haystack volumes
+  },
+  "Fs": {
+    "MountFolder": "/home/ubuntu/Fs" // location for the general file system
+  },
+  "UploadArea": "/home/ubuntu/Upload" // location for the upload area from EBS direct upload
+}
+```
+
+Mount volumes
+
+```sh
+mkdir /home/ubuntu/Volumes/vol_1
 ```
 
 Start the server

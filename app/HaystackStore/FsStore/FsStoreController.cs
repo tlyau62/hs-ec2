@@ -45,16 +45,19 @@ public class FsStoreController : ControllerBase
     [HttpPost("fs")]
     public void UnpackPhotos(IFormFile? file, [FromForm] string? location, [FromForm] string keyPattern = "^\\d+")
     {
+        if (file != null)
+        {
+            using var ms = new MemoryStream();
+
+            file.CopyTo(ms);
+            _storeService.UnpackPhotos(keyPattern, ms.ToArray());
+        }
+
         if (location != null)
         {
             _storeService.LoadPhotos(keyPattern, location);
             return;
         }
-
-        using var ms = new MemoryStream();
-
-        file.CopyTo(ms);
-        _storeService.UnpackPhotos(keyPattern, ms.ToArray());
     }
 }
 
