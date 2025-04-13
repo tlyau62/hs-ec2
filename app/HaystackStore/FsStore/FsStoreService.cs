@@ -7,10 +7,15 @@ public class FsStoreService : IFsStoreService
 {
     private readonly string mountFolder = "/Users/tlyau/Documents/git/cs5296-project/app/HaystackStore/Fs";
 
+    private readonly string _uploadArea;
+
     public FsStoreService(IConfiguration config)
     {
         mountFolder = config.GetValue<string>("Fs:MountFolder") ??
             throw new InvalidDataException("missing config Fs:MountFolder");
+        _uploadArea = config.GetValue<string>("UploadArea") ??
+            throw new InvalidDataException("missing config UploadArea");
+
     }
 
     public byte[]? ReadPhoto(int key)
@@ -58,6 +63,20 @@ public class FsStoreService : IFsStoreService
 
             WritePhoto(key, fileStream.ToArray());
         }
+    }
+
+    public void LoadPhotos(string keyPattern, string location)
+    {
+        var fileLocation = Path.Join(_uploadArea, location);
+
+        if (!File.Exists(fileLocation))
+        {
+            return;
+        }
+
+        var data = File.ReadAllBytes(fileLocation);
+
+        UnpackPhotos(keyPattern, data);
     }
 }
 

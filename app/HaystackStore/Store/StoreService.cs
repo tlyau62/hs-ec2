@@ -9,10 +9,14 @@ public class StoreService : IStoreService
 
     private readonly INeedleCache _needleCache;
 
-    public StoreService(IVolumeManger volumeManger, INeedleCache needleCache)
+    private readonly string _uploadArea;
+
+    public StoreService(IVolumeManger volumeManger, INeedleCache needleCache, IConfiguration config)
     {
         _volumeManger = volumeManger;
         _needleCache = needleCache;
+        _uploadArea = config.GetValue<string>("UploadArea") ??
+            throw new InvalidDataException("missing config UploadArea");
 
         Init();
     }
@@ -70,6 +74,8 @@ public class StoreService : IStoreService
 
     private void Init()
     {
+        Directory.CreateDirectory(Path.GetDirectoryName(_uploadArea));
+
         foreach (var vol in _volumeManger.GetVolumes())
         {
             foreach (var metadata in vol.GetAllMetadata())
@@ -77,6 +83,20 @@ public class StoreService : IStoreService
                 _needleCache.CacheNeedle(vol.VolumeId, metadata);
             }
         }
+    }
+
+    public void LoadPhotos(string keyPattern, string location)
+    {
+        var fileLocation = Path.Join(_uploadArea, location);
+
+        if (!File.Exists(fileLocation))
+        {
+            return;
+        }
+
+        var data = File.ReadAllBytes(fileLocation);
+
+        UnpackPhotos(keyPattern, data);
     }
 }
 

@@ -43,8 +43,14 @@ public class StoreController : ControllerBase
     }
 
     [HttpPost("photos")]
-    public void UnpackPhotos(IFormFile file, [FromForm] string keyPattern = "^\\d+")
+    public void UnpackPhotos(IFormFile? file, [FromForm] string? location, [FromForm] string keyPattern = "^\\d+")
     {
+        if (location != null)
+        {
+            _storeService.LoadPhotos(keyPattern, location);
+            return;
+        }
+
         using var ms = new MemoryStream();
 
         file.CopyTo(ms);
