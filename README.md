@@ -46,6 +46,7 @@ export PATH=$PATH:$DOTNET_ROOT:$DOTNET_ROOT/tools
 Build the source codes
 
 ```sh
+cd ./src
 dotnet publish
 ```
 
@@ -110,4 +111,26 @@ export DOTNET_ENVIRONMENT=Development
 
 # try upload the photo test pack at /api/store/photos: test-files/subset_faces.zip
 # try get a photo: /api/store/photos/1
+```
+
+Restarting VM
+
+```sh
+# run the followings whenever a vm is restarted
+export DOTNET_ROOT=$HOME/.dotnet
+export PATH=$PATH:$DOTNET_ROOT:$DOTNET_ROOT/tools
+export ASPNETCORE_HTTP_PORTS=8080
+export DOTNET_ENVIRONMENT=Development
+```
+
+## Generate dummy images
+
+```sh
+scp -i ~/Desktop/ec2/pem2.pem ./dummy-image-generator/dummy-image-generator.sh ubuntu@52.207.245.24:~
+```
+
+```sh
+bash ./dummy-image-generator # sh ./dummy-image-generator
+zip -r ./imgs.zip ./imgs/*
+mv ./imgs.zip ./Upload
 ```
