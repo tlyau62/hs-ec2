@@ -1,8 +1,12 @@
+using Microsoft.Win32.SafeHandles;
+
 namespace HaystackStore;
 
 public class Volume : IVolume, IDisposable
 {
     private readonly FileStream _volumeFile;
+
+    private readonly SafeFileHandle _fileHandle;
 
     private int _id;
 
@@ -10,6 +14,7 @@ public class Volume : IVolume, IDisposable
     {
         _id = id;
         _volumeFile = volumeFile;
+        _fileHandle = volumeFile.SafeFileHandle;
     }
 
     public int VolumeId => _id;
@@ -23,10 +28,10 @@ public class Volume : IVolume, IDisposable
             Flags = false,
             Size = data.Length,
             Data = data,
+            Footer = Needle.FOOTER_MAGIC_NUMBER
         };
 
         needle.Checksum = CalculateChecksum(needle);
-        needle.Footer = Needle.FOOTER_MAGIC_NUMBER;
 
         var offset = WriteNeedleToDisk(needle);
 
@@ -52,33 +57,71 @@ public class Volume : IVolume, IDisposable
 
     public Needle ReadNeedle(long offset)
     {
-        using var reader = new BinaryReader(_volumeFile, System.Text.Encoding.UTF8, true);
-        _volumeFile.Seek(offset, SeekOrigin.Begin);
+        var currentOffset = offset;
 
-        var needle = new Needle
-        {
-            Header = reader.ReadUInt32(),
-            Key = reader.ReadInt64(),
-            Flags = reader.ReadByte() == 1,
-            Size = reader.ReadInt32()
-        };
-
-        if (needle.Header != Needle.HEADER_MAGIC_NUMBER)
+        // Read header
+        var headerBytes = new byte[sizeof(uint)];
+        RandomAccess.Read(_fileHandle, headerBytes.AsSpan(), currentOffset);
+        var header = BitConverter.ToUInt32(headerBytes);
+        if (header != Needle.HEADER_MAGIC_NUMBER)
         {
             throw new InvalidDataException("Invalid needle header");
         }
+        currentOffset += sizeof(uint);
 
-        needle.Data = reader.ReadBytes(needle.Size);
-        needle.Checksum = reader.ReadUInt32();
+        // Read key
+        var keyBytes = new byte[sizeof(long)];
+        RandomAccess.Read(_fileHandle, keyBytes.AsSpan(), currentOffset);
+        var key = BitConverter.ToInt64(keyBytes);
+        currentOffset += sizeof(long);
+
+        // Read flags
+        var flagsBytes = new byte[sizeof(byte)];
+        RandomAccess.Read(_fileHandle, flagsBytes.AsSpan(), currentOffset);
+        var flags = flagsBytes[0];
+        currentOffset += sizeof(byte);
+
+        // Read size
+        var sizeBytes = new byte[sizeof(int)];
+        RandomAccess.Read(_fileHandle, sizeBytes.AsSpan(), currentOffset);
+        var size = BitConverter.ToInt32(sizeBytes);
+        currentOffset += sizeof(int);
+
+        // Read data
+        var data = new byte[size];
+        RandomAccess.Read(_fileHandle, data.AsSpan(), currentOffset);
+        currentOffset += size;
+
+        // Read checksum
+        var checksumBytes = new byte[sizeof(uint)];
+        RandomAccess.Read(_fileHandle, checksumBytes.AsSpan(), currentOffset);
+        var checksum = BitConverter.ToUInt32(checksumBytes);
+        currentOffset += sizeof(uint);
+
+        // Read footer
+        var footerBytes = new byte[sizeof(uint)];
+        RandomAccess.Read(_fileHandle, footerBytes.AsSpan(), currentOffset);
+        var footer = BitConverter.ToUInt32(footerBytes);
+        if (footer != Needle.FOOTER_MAGIC_NUMBER)
+        {
+            throw new InvalidDataException("Invalid needle footer");
+        }
+
+        // Construct needle
+        var needle = new Needle
+        {
+            Header = header,
+            Key = key,
+            Flags = flags == 1,
+            Size = size,
+            Data = data,
+            Checksum = checksum,
+            Footer = footer
+        };
+
         if (needle.Checksum != CalculateChecksum(needle))
         {
             throw new InvalidDataException("Checksum verification failed");
-        }
-
-        needle.Footer = reader.ReadUInt32();
-        if (needle.Footer != Needle.FOOTER_MAGIC_NUMBER)
-        {
-            throw new InvalidDataException("Invalid needle footer");
         }
 
         return needle;
