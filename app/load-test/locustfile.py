@@ -6,6 +6,6 @@ class HelloWorldUser(HttpUser):
 
     @task
     def hello_world(self):
-        img_id = random.randint(1, 10001)
+        img_id = random.randint(1, 10000)
 
         self.client.get("/api/store/fs/" + str(img_id))
