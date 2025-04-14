@@ -134,3 +134,10 @@ bash ./dummy-image-generator # sh ./dummy-image-generator
 zip -r ./imgs.zip ./imgs/*
 mv ./imgs.zip ./Upload
 ```
+
+## Load test
+
+```sh
+locust --locustfile haystack.py
+locust --locustfile fs.py
+```
