@@ -1,0 +1,2 @@
+Method,Name,Error,Occurrences
+GET,/api/store/fs/10001,HTTPError('404 Client Error: Not Found for url: /api/store/fs/10001'),4
