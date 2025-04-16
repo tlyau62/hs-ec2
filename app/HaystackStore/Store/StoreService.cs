@@ -31,7 +31,7 @@ public class StoreService : IStoreService
             return null;
         }
 
-        var needle = volume.ReadNeedle(metadata.Offset);
+        var needle = volume.ReadNeedleAtomic(metadata);
 
         return needle.Data;
     }
