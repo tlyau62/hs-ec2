@@ -104,6 +104,9 @@ http://13.218.36.59:8080/api/store/photos/test # should return OK
 Access to the api
 
 ```sh
+# remove the development config, use production config
+rm appsettings.Development.json 
+
 # change to development mode, and restart server
 export DOTNET_ENVIRONMENT=Development
 

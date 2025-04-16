@@ -46,4 +46,19 @@ public class Needle
     {
         return $"Header = {Header}, Key = {Key}, Flags = {Flags}, Size = {Size}, Data = {Data.Length}, Footer = {Footer}, Checksum = {Checksum}";
     }
+
+    public static int GetByteLength(int dataSize)
+    {
+        var fields = new int[] {
+            sizeof(uint), // header
+            sizeof(long), // key
+            sizeof(byte), // flags
+            sizeof(int), // size
+            dataSize,
+            sizeof(uint), // checksum
+            sizeof(uint) // footer
+        };
+
+        return fields.Sum();
+    }
 }
