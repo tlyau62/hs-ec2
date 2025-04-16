@@ -58,8 +58,6 @@ public class GaussianFileWait : IFileWait
     {
         var bytesLatency = ByteLatency * totalBytes;
 
-        Console.WriteLine(bytesLatency);
-
         Thread.Sleep((int)bytesLatency);
     }
 
