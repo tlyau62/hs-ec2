@@ -10,11 +10,14 @@ public class Volume : IVolume, IDisposable
 
     private int _id;
 
-    public Volume(int id, FileStream volumeFile)
+    private readonly IFileWait _fileWait;
+
+    public Volume(int id, FileStream volumeFile, IFileWait fileWait)
     {
         _id = id;
         _volumeFile = volumeFile;
         _fileHandle = volumeFile.SafeFileHandle;
+        _fileWait = fileWait;
     }
 
     public int VolumeId => _id;
@@ -123,6 +126,8 @@ public class Volume : IVolume, IDisposable
         {
             throw new InvalidDataException("Checksum verification failed");
         }
+
+        _fileWait.WaitBytesRead(needle.TotalBytes.Length);
 
         return needle;
     }

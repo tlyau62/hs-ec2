@@ -138,6 +138,26 @@ mv ./imgs.zip ./Upload
 ## Load test
 
 ```sh
+sudo apt install python3
+sudo apt install python3-pip
+pip3 install locust ## pip install locust --break-system-packages
+```
+
+```sh
+cd app/load-test
+scp -i ~/Desktop/ec2/pem2.pem haystack.py fs.py ubuntu@54.89.186.196:~
+```
+
+```sh
 locust --locustfile haystack.py
 locust --locustfile fs.py
+```
+
+```sh
+locust --locustfile haystack.py --csv haystack --headless -t10m --users 100 --spawn-rate 10 --host http://172.31.42.40:8080
+locust --locustfile fs.py --csv fs --headless -t10m  --users 100 --spawn-rate 10 --host http://172.31.42.40:8080
+```
+
+```sh
+scp -i ~/Desktop/ec2/pem2.pem ubuntu@54.89.186.196:hs/hs.zip .
 ```

@@ -9,25 +9,27 @@ public class FsStoreService : IFsStoreService
 
     private readonly string _uploadArea;
 
-    public FsStoreService(IConfiguration config)
+    private readonly IFileRead _fileRead;
+
+    public FsStoreService(IConfiguration config, IFileRead fileRead)
     {
         mountFolder = config.GetValue<string>("Fs:MountFolder") ??
             throw new InvalidDataException("missing config Fs:MountFolder");
         _uploadArea = config.GetValue<string>("UploadArea") ??
             throw new InvalidDataException("missing config UploadArea");
-
+        _fileRead = fileRead;
     }
 
     public byte[]? ReadPhoto(int key)
     {
         var filePath = Path.Join(mountFolder, $"{key}.png");
 
-        if (!File.Exists(filePath))
+        if (!_fileRead.Exists(filePath))
         {
             return null;
         }
 
-        return File.ReadAllBytes(filePath);
+        return _fileRead.ReadAllBytes(filePath);
     }
 
     public void WritePhoto(int key, byte[] data)

@@ -12,10 +12,13 @@ public class VolumeManger : IVolumeManger
 
     private IDictionary<int, Volume> _volumes = new Dictionary<int, Volume>();
 
-    public VolumeManger(IConfiguration config)
+    private readonly IFileWait _fileWait;
+
+    public VolumeManger(IConfiguration config, IFileWait fileWait)
     {
         mountFolder = config.GetValue<string>("Haystack:MountFolder") ??
             throw new InvalidDataException("missing config Haystack:MountFolder");
+        _fileWait = fileWait;
         Init();
     }
 
@@ -65,7 +68,7 @@ public class VolumeManger : IVolumeManger
                 volumeFile = new FileStream(filePath, FileMode.Open, FileAccess.ReadWrite);
             }
 
-            volume = new Volume(i, volumeFile);
+            volume = new Volume(i, volumeFile, _fileWait);
             _volumes[i] = volume;
         }
     }
