@@ -31,9 +31,9 @@ public class StoreService : IStoreService
             return null;
         }
 
-        var needle = volume.ReadNeedleAtomic(metadata);
+        var data = volume.ReadData(metadata);
 
-        return needle.Data;
+        return data;
     }
 
     public void WritePhoto(int key, byte[] data)

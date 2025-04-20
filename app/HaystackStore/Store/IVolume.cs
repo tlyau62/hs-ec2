@@ -8,7 +8,7 @@ public interface IVolume
      */
     Metadata WriteNeedle(long key, byte[] data);
     Needle ReadNeedle(long offset);
-    Needle ReadNeedleAtomic(Metadata metadata);
+    byte[] ReadData(Metadata metadata);
     IEnumerable<Metadata> GetAllMetadata();
 }
 
