@@ -1,4 +1,4 @@
-# CS5296 Projects
+# HS EC2
 
 ## Deploy
 
